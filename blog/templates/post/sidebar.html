@@ -1,21 +1,22 @@
-<h2>My blog</h2>
-<p>This is my blog</p>
+
+<h2>Info</h2>
 {% with blogs_subscribed=request.user.blogs_subscribed.all %}
     {{ blogs_subscribed.count }} user{{ blogs_subscribed.count|pluralize }} subscribed on you:<br>
     {% for blog in blogs_subscribed %}
         {{ blog.user.username }}
-{#        <a href="{% url 'blog:unsubscribe' blog.id %}">Отписаться</a>#}
+
     {% endfor %}
 {% endwith %}
 <hr>
-{% with subscribes=request.user.blog.users_subscribe.all %}
-    {{ subscribes.count }} bloger{{ subscribes.count|pluralize }} subscribed:<br>
+{% with subscribes=request.user.blog.subscribes.all %}
+    You've subscribed on {{ subscribes.count }} bloger{{ subscribes.count|pluralize }} :<br>
     {% for bloger in subscribes %}
-        {{ blog.user.username }}
-        <a href="{% url 'blog:unsubscribe' blog.id %}">Отписаться</a>
+        {{ bloger.username }}
+        <a href="{% url 'blog:unsubscribe' bloger.blog.id %}">Unsubcscribe</a><br>
     {% endfor %}
 {% endwith %}
 <hr>
+<h2>News feed</h2>
 {% with news_posts=request.user.blog.news_feed.all %}
     {% for news_post in  news_posts %}
         <a href="{{ news_post.post.get_absolute_url }}">

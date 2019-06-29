@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import ListView, UpdateView
 from django.views import View
-from .models import Post, Blog
+from .models import Post, Blog, NewsPost
 from .forms import PostCreateForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -69,30 +69,33 @@ class PostCreateView(View):
 
         return render(request, self.template_name, {'post_form': form})
 
+class UsersView(ListView):
+    model = User
+    context_object_name = 'users'
 
-class SubscribeBlog(View):
+class SubscribeBlogView(View):
     def get(self, request, blog_id):
         blog_to_subscribe = get_object_or_404(Blog, id=blog_id)
         current_blog = request.user.blog
         with transaction.atomic():
             if blog_to_subscribe.user not in current_blog.subscribes.all():
                 current_blog.subscribes.add(blog_to_subscribe.user)
+                for post in blog_to_subscribe.posts.all():
+                    news = NewsPost(blog=blog_to_subscribe, post=post)
+                    news.save()
+                    current_blog.news_feed.add(news)
+
         # messages.success(request, f'You have been subscribed to {blog_to_subscribe.user.username}')
         return redirect('blog:post-list')
 
 
-class UnsubscribeBlog(View):
+class UnsubscribeBlogView(View):
     def get(self, request, blog_id):
         blog_to_unsubscribe = get_object_or_404(Blog, id=blog_id)
         current_blog = request.user.blog
         with transaction.atomic():
             if blog_to_unsubscribe.user in current_blog.subscribes.all():
-
-                current_blog.subscribes.remove(blog_to_unsubscribe.user)
-            if blog_to_unsubscribe in request.user.blogs_subscribed.all():
-                request.user.blogs_subscribed.remove(blog_to_unsubscribe)
-
-            for news_post in current_blog.news_feed.all():
-                news_post.delete()
+                current_blog.subscribes.remove(blog_to_unsubscribe.user)  # delete subscribes
+                current_blog.news_feed.filter(post__blog=blog_to_unsubscribe).delete()  # clean news_feed
         # messages.warning(request, f'You have been unsubscribed from {blog_to_unsubscribe.user.username}')
         return redirect('blog:post-list')

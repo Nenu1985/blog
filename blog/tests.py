@@ -2,7 +2,7 @@ from django.test import TestCase, RequestFactory
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from blog.models import Blog, Post, NewsPost
-from blog.views import SubscribeBlog, UnsubscribeBlog
+from blog.views import SubscribeBlogView, UnsubscribeBlogView
 from django.contrib import messages
 
 # >>> from django.test.utils import setup_test_environment
@@ -94,7 +94,7 @@ class BlogTest(TestCase):
 
         request = factory.get("subscribe/", {'blog_id': blog_id,})
         request.user = self.john
-        view = setup_view(SubscribeBlog(), request)
+        view = setup_view(SubscribeBlogView(), request)
 
         subscribes_before = self.john.blog.subscribes.all()
         self.assertEqual(subscribes_before.count(), 0, 'Subscribes count is wrong!')
@@ -122,7 +122,7 @@ class BlogTest(TestCase):
 
         request = factory.get("unsubscribe/", {'blog_id': blog_id, })
         request.user = self.john
-        view = setup_view(UnsubscribeBlog(), request)
+        view = setup_view(UnsubscribeBlogView(), request)
 
         subscribes_before = self.john.blog.subscribes.all()
         self.assertEqual(subscribes_before.count(), 1, 'Subscribes count is wrong!')
