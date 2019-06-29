@@ -42,17 +42,22 @@
                     <a class="dropdown-item" href="#">Something else here</a>
                 </div>
             </li>
-        </ul>
-        <div id="navbar-text" class="navbar-text">
-            {% if request.user.is_authenticated %}
-                Hello {{ request.user.username }}
-                {#                        <li class=" nav-item"><a href="{% url "account:logout-django" %}">Logout</a></li>#}
 
+
+            {% if request.user.is_authenticated %}
+                <span id="navbar-text" class="navbar-text">    Hello {{ request.user.username }} </span>
+                {#                        <li class=" nav-item"><a href="{% url "account:logout-django" %}">Logout</a></li>#}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+
+                </li>
             {% else %}
                 {#                        <li class="nav-item"><a href="{% url "account:login-django" %}">Log-in</a></li>#}
-                Вы не авторизованы
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">Login</a>
+                </li>
             {% endif %}
-        </div>
+        </ul>
 
     </div>
 </nav>
