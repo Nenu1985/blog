@@ -24,5 +24,5 @@ class BlogAdmin(admin.ModelAdmin):
 
 
 @admin.register(NewsPost)
-class BlogAdmin(admin.ModelAdmin):
+class NewPostAdmin(admin.ModelAdmin):
     list_display = ('post', 'read', 'added',)

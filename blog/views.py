@@ -1,12 +1,16 @@
 from django.shortcuts import render, get_object_or_404, redirect, reverse, get_list_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.views.generic import ListView
+from django.views.generic import ListView, UpdateView
 from django.views import View
-from .models import Post
+from .models import Post, Blog
 from .forms import PostCreateForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db import transaction
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 # Create your views here.
 # http://127.0.0.1:8000/blog/
@@ -64,3 +68,31 @@ class PostCreateView(View):
             # return redirect(reverse('blog:post-list'))
 
         return render(request, self.template_name, {'post_form': form})
+
+
+class SubscribeBlog(View):
+    def get(self, request, blog_id):
+        blog_to_subscribe = get_object_or_404(Blog, id=blog_id)
+        current_blog = request.user.blog
+        with transaction.atomic():
+            if blog_to_subscribe.user not in current_blog.subscribes.all():
+                current_blog.subscribes.add(blog_to_subscribe.user)
+        # messages.success(request, f'You have been subscribed to {blog_to_subscribe.user.username}')
+        return redirect('blog:post-list')
+
+
+class UnsubscribeBlog(View):
+    def get(self, request, blog_id):
+        blog_to_unsubscribe = get_object_or_404(Blog, id=blog_id)
+        current_blog = request.user.blog
+        with transaction.atomic():
+            if blog_to_unsubscribe.user in current_blog.subscribes.all():
+
+                current_blog.subscribes.remove(blog_to_unsubscribe.user)
+            if blog_to_unsubscribe in request.user.blogs_subscribed.all():
+                request.user.blogs_subscribed.remove(blog_to_unsubscribe)
+
+            for news_post in current_blog.news_feed.all():
+                news_post.delete()
+        # messages.warning(request, f'You have been unsubscribed from {blog_to_unsubscribe.user.username}')
+        return redirect('blog:post-list')

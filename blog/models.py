@@ -3,9 +3,15 @@ from django.conf import settings
 from django.utils import timezone
 from django.urls import reverse
 from django.utils.text import slugify
+from django.db.models import signals
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 # Create your models here.
+
+# Create your models here.
+
 
 
 class PublishedManager(models.Manager):
@@ -16,16 +22,22 @@ class PublishedManager(models.Manager):
 
 
 class Blog(models.Model):
-
-    user = models.OneToOneField(settings.AUTH_USER_MODEL,
+    user = models.OneToOneField(User,
                                 on_delete=models.CASCADE)
 
-    users_subscribe = models.ManyToManyField(settings.AUTH_USER_MODEL,
-                                             related_name='blogs_subscribed',
-                                             blank=True)
+    # users_subscribe = models.ForeignKey(User,
+    #                                     related_name='blogs_subscribed',
+    #                                     on_delete=models.CASCADE, null=True)
+    subscribes = models.ManyToManyField(User,
+                                        related_name='blogs_subscribed',
+                                        blank=True, null=True)
 
     def __str__(self):
         return f'{self.user.username}\'s blog!'
+
+
+# class BlogUser(User):
+#     subscribed_blogs = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name='user')
 
 
 class Post(models.Model):
@@ -57,7 +69,7 @@ class Post(models.Model):
                               default='draft')
 
     blog = models.ForeignKey(Blog, on_delete=models.CASCADE,
-                              related_name='posts',)
+                             related_name='posts', )
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -75,12 +87,11 @@ class Post(models.Model):
         ordering = ('-publish',)
 
     def __str__(self):
-        return self.title
+        return f'{self.title} by {self.blog.user.username}'
 
 
 class NewsPost(models.Model):
-
-    post = models.OneToOneField(Post, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
 
     read = models.BooleanField(default=False)
     added = models.DateTimeField(auto_now=True)
@@ -91,4 +102,20 @@ class NewsPost(models.Model):
         ordering = ('-added',)
 
     def __str__(self):
-        return f'News Item of {self.post.slug}'
+        return f'Owner: {self.blog.user.username}. Slug: {self.post.slug}. From: {self.post.blog.user.username}'
+
+
+def news_feeds_update(sender, instance, signal, *args, **kwargs):
+    subscribed_blogs = instance.blog.user.blogs_subscribed.all()
+    for blog in subscribed_blogs:
+        news = NewsPost(blog=blog,
+                        post=instance,
+                        )
+        news.save()
+
+    # Send verification email
+    # send_verification_email.delay(instance.pk)
+
+
+# subscribe a handler to post_save CustomerUser event
+signals.post_save.connect(news_feeds_update, sender=Post)
