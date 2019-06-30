@@ -123,7 +123,7 @@ def send_mails_to_subscribers(sender, blogs, post):
     full_url = ''.join(['http://', Site.objects.get_current().domain, post.get_absolute_url()])
     subject = f'{sender} has published a post'
     message = f'{sender} has posted a new post: {post.title}' \
-    f'Read {post.title} at {post.get_absolute_url()}'
+    f'Read {post.title} at {full_url}'
     try:
         send_mail(subject, message, 'blog_nekidaem@vas.sovsem', recipients)
         print('messages have been sent')
