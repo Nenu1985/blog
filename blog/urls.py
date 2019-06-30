@@ -11,5 +11,5 @@ urlpatterns = [
     path('unsubscribe/<int:blog_id>', views.UnsubscribeBlogView.as_view(), name='unsubscribe'),
     path('users/', views.UsersView.as_view(template_name='post/user_list.html'), name='users'),
     path('news-post/<int:pk>/', views.MarkNewsAsReadView.as_view(), name='news-post-update'),
-    # path('news-post/<int:pk>/', views.MarkNewsAsReadView.as_view(), name='news-post-detail'),
+
 ]
