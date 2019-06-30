@@ -5,6 +5,8 @@ from django.urls import reverse
 from django.utils.text import slugify
 from django.db.models import signals
 from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
+from django.contrib.sites.models import Site
 
 User = get_user_model()
 
@@ -108,14 +110,26 @@ class NewsPost(models.Model):
 
 def news_feeds_update(sender, instance, signal, *args, **kwargs):
     subscribed_blogs = instance.blog.user.blogs_subscribed.all()
+    send_mails_to_subscribers(instance.blog.user, subscribed_blogs, instance)
     for blog in subscribed_blogs:
         news = NewsPost(blog=blog,
                         post=instance,
                         )
         news.save()
 
-    # Send verification email
-    # send_verification_email.delay(instance.pk)
+
+def send_mails_to_subscribers(sender, blogs, post):
+    recipients = [blog.user.email for blog in blogs]
+    full_url = ''.join(['http://', Site.objects.get_current().domain, post.get_absolute_url()])
+    subject = f'{sender} has published a post'
+    message = f'{sender} has posted a new post: {post.title}' \
+    f'Read {post.title} at {post.get_absolute_url()}'
+    try:
+        send_mail(subject, message, 'blog_nekidaem@vas.sovsem', recipients)
+        print('messages have been sent')
+    except ConnectionRefusedError:
+        print('Connection error. Check your settings')
+
 
 
 # subscribe a handler to post_save CustomerUser event
