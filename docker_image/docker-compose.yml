@@ -12,7 +12,12 @@ services:
     - db
 
  db:
-   image: "keinos/sqlite3"
+    image: "keinos/sqlite3:latest"
+#    stdin_open: true
+#    tty: true
+#    volumes:
+#      - ./db/:/root/db/
+
 #   image: postgres
 #   ports:
 #     - "5432:5432"

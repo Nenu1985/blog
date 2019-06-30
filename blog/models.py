@@ -120,7 +120,7 @@ def news_feeds_update(sender, instance, signal, *args, **kwargs):
 
 def send_mails_to_subscribers(sender, blogs, post):
     recipients = [blog.user.email for blog in blogs]
-    full_url = ''.join(['http://', Site.objects.get_current().domain, post.get_absolute_url()])
+    full_url = ''.join(['http://', Site.objects.get_current().domain, ':8000', post.get_absolute_url()])
     subject = f'{sender} has published a post'
     message = f'{sender} has posted a new post: {post.title}' \
     f'Read {post.title} at {full_url}'
