@@ -66,7 +66,7 @@ class Post(models.Model):
     updated = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=10,
                               choices=STATUS_CHOICES,
-                              default='draft')
+                              default='published')
 
     blog = models.ForeignKey(Blog, on_delete=models.CASCADE,
                              related_name='posts', )
@@ -78,10 +78,7 @@ class Post(models.Model):
 
     def get_absolute_url(self):
         return reverse('blog:post-detail',
-                       args=[self.publish.year,
-                             self.publish.month,
-                             self.publish.day,
-                             self.slug])
+                       kwargs={'pk': self.pk})
 
     class Meta:
         ordering = ('-publish',)
@@ -103,6 +100,10 @@ class NewsPost(models.Model):
 
     def __str__(self):
         return f'Owner: {self.blog.user.username}. Slug: {self.post.slug}. From: {self.post.blog.user.username}'
+
+    def get_absolute_url(self):
+        return reverse('blog:news-post-detail',
+                       kwargs={'pk': self.pk})
 
 
 def news_feeds_update(sender, instance, signal, *args, **kwargs):
