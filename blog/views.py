@@ -49,7 +49,8 @@ class UsersView(ListView):
 
 
 class SubscribeBlogView(View):
-    def get(self, request, blog_id):
+    @staticmethod
+    def get(request, blog_id):
         blog_to_subscribe = get_object_or_404(Blog, id=blog_id)
         current_blog = request.user.blog
         with transaction.atomic():
@@ -65,7 +66,8 @@ class SubscribeBlogView(View):
 
 
 class UnsubscribeBlogView(View):
-    def get(self, request, blog_id):
+    @staticmethod
+    def get(request, blog_id):
         blog_to_unsubscribe = get_object_or_404(Blog, id=blog_id)
         current_blog = request.user.blog
         with transaction.atomic():
