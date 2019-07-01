@@ -1,7 +1,7 @@
 
 <h2>Info</h2><hr>
 {% with blogs_subscribed=request.user.blogs_subscribed.all %}
-    {{ blogs_subscribed.count }} user{{ blogs_subscribed.count|pluralize }} subscribed on you:<br>
+    {{ blogs_subscribed.count }} user{{ blogs_subscribed.count|pluralize }} are following you:<br>
     {% for blog in blogs_subscribed %}
         {{ blog.user.username }}
 

@@ -159,5 +159,7 @@ class BlogTest(TestCase):
                          self.vanya.blog.news_feed.all().count(),
                          ]
         self.assertEqual(news_in_feeds, [1, 0, 0], 'News count after post is wrong')
+        
+        
 
         # 1 subscriber

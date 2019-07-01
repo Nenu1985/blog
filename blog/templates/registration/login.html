@@ -8,4 +8,6 @@
         {% csrf_token %}
         <p><input type="submit" value="Log in"></p>
     </form>
+    <a class="float-right" href="{% url 'blog:test-user-login' %}">
+        Login as test user <b>vasya</b></a>
 {% endblock %}

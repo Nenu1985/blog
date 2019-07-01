@@ -7,6 +7,7 @@ from .forms import PostCreateForm
 from django.contrib import messages
 from django.db import transaction
 from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate, login
 
 User = get_user_model()
 
@@ -18,12 +19,12 @@ class PostListView(ListView):
     context_object_name = 'posts'
     paginate_by = 3
 
-    template_name = 'post/list.html'
+    template_name = 'blog/list.html'
 
 
 class PostDetailView(DetailView):
     model = Post
-    template_name = 'post/detail.html'
+    template_name = 'blog/detail.html'
     context_object_name = 'post'
 
 
@@ -87,3 +88,10 @@ class MarkNewsAsReadView(UpdateView):
 class NewsPostDetailView(DetailView):
     model = NewsPost
 
+
+class TestUserAuthentificate(View):
+    @staticmethod
+    def get(request):
+        user = authenticate(username='vasya', password='1234')
+        login(request, user)
+        return redirect('blog:post-list')
