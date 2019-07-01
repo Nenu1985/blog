@@ -23,9 +23,8 @@ def setup_view(view, request, *args, **kwargs):
 class DemoTest(TestCase):
     def test_blog_save(self):
         self.john = User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword')
-        b = Blog(user=self.john)
-        b.save()
-        self.assertTrue(b, 'Blog creation error')
+
+        self.assertTrue( self.john.blog, 'Blog creation error')
 
     def test_user(self):
         self.john = User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword')
@@ -42,13 +41,6 @@ class BlogTest(TestCase):
         self.vanya = User.objects.create_user('vanya', 'lennon@thebeatles.com', 'johnpassword')
 
         self.user = authenticate(username='john', password='johnpassword')
-
-        users = [self.john, self.andrey, self.vanya]
-        for user in users:
-            b = Blog(user=user)
-            b.save()
-
-
 
     def test_blog(self):
         b = Blog.objects.get(user=self.john)
@@ -141,7 +133,7 @@ class BlogTest(TestCase):
         self.assertEqual(response.url, '/blog/', 'Redirected url is wrong')
 
     def test_news_feed(self):
-        # John subscribed on andrey:
+        # subscribe John on andrey:
         self.john.blog.subscribes.add(self.andrey)
 
         news_in_feeds = [self.john.blog.news_feed.all().count(),
@@ -159,7 +151,22 @@ class BlogTest(TestCase):
                          self.vanya.blog.news_feed.all().count(),
                          ]
         self.assertEqual(news_in_feeds, [1, 0, 0], 'News count after post is wrong')
-        
-        
 
-        # 1 subscriber
+
+    def test_mail_sending(self):
+        # user with real email
+        nenu = User.objects.create_user('nenuzhny85',
+                                        'nenuzhny85@gmail.com',
+                                        'nenupassword')
+
+        # subscribe nenu to john
+        nenu.blog.subscribes.add(self.john)
+        self.assertTrue(nenu in self.john.blogs_subscribed.all(), 'nenu is not in john\'s followers')
+
+        # john creates a post
+        post = Post(title='New post', body='Post body', status='published', blog=self.john.blog)
+        post.save()
+
+        self.assertEqual(nenu.email, 'nenuzhny85@gmail.com', 'nenu mail is wrong')
+        self.assertTrue(nenu.blog, 'Nenu\'s blog is absent')
+

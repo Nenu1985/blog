@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.contrib.sites.models import Site
 import asyncio
+import logging
 
 loop = asyncio.get_event_loop()
 User = get_user_model()
@@ -110,6 +111,10 @@ class NewsPost(models.Model):
                        kwargs={'pk': self.pk})
 
 
+def create_blog_for_new_user(sender, instance, signal, *args, **kwargs):
+        Blog(user=instance).save()
+
+
 def news_feeds_update(sender, instance, signal, *args, **kwargs):
     subscribed_blogs = instance.blog.user.blogs_subscribed.all()
     send_mails_to_subscribers(instance.blog.user, subscribed_blogs, instance)
@@ -127,14 +132,18 @@ def send_mails_to_subscribers(sender, blogs, post):
     message = f'{sender} has posted a new post: {post.title}' \
     f'Read {post.title} at {full_url}'
     args = [subject, message, 'blog_nekidaem@vas.sovsem', recipients]
-    loop.run_in_executor(None, start_sending, args)
+    result = loop.run_in_executor(None, start_sending, args)
+    return result
 
 def start_sending(args):
+    result = 0
     try:
-        send_mail(args[0], args[1], args[2], args[3])
-        print('messages have been sent')
+        result = send_mail(args[0], args[1], args[2], args[3])
+        logging.info(f'mail to {args[3]} has been sent. Result = {result}.')
     except ConnectionRefusedError:
-        print('Connection error. Check your settings')
+        logging.info(f'Error while sending mail to {args[3]}.')
+    return result
 
 # subscribe a handler to post_save CustomerUser event
 signals.post_save.connect(news_feeds_update, sender=Post)
+signals.post_save.connect(create_blog_for_new_user, sender=User)
