@@ -9,9 +9,9 @@ from django.core.mail import send_mail
 from django.contrib.sites.models import Site
 import asyncio
 import logging
-
+from django.contrib.auth.models import User
 loop = asyncio.get_event_loop()
-User = get_user_model()
+# User = get_user_model()
 
 # Create your models here.
 
@@ -26,19 +26,19 @@ class PublishedManager(models.Manager):
             .filter(status='published')
 
 
-class Blog(models.Model):
-    user = models.OneToOneField(User,
-                                on_delete=models.CASCADE)
+# class Blog(models.Model):
+#     user = models.OneToOneField(User,
+#                                 on_delete=models.CASCADE)
 
-    # users_subscribe = models.ForeignKey(User,
-    #                                     related_name='blogs_subscribed',
-    #                                     on_delete=models.CASCADE, null=True)
-    subscribes = models.ManyToManyField(User,
-                                        related_name='blogs_subscribed',
-                                        blank=True, null=True)
+#     # users_subscribe = models.ForeignKey(User,
+#     #                                     related_name='blogs_subscribed',
+#     #                                     on_delete=models.CASCADE, null=True)
+#     # subscribes = models.ForeignKey(User,
+#     #                                related_name='blogs_subscribed', on_delete=models.CASCADE,
+#     #                                blank=True, null=True)
 
-    def __str__(self):
-        return f'{self.user.username}\'s blog!'
+#     def __str__(self):
+#         return f'{self.user.username}\'s blog!'
 
 
 # class BlogUser(User):
@@ -73,8 +73,8 @@ class Post(models.Model):
                               choices=STATUS_CHOICES,
                               default='published')
 
-    blog = models.ForeignKey(Blog, on_delete=models.CASCADE,
-                             related_name='posts', )
+    author = models.ForeignKey(User, on_delete=models.CASCADE,
+                               related_name='posts', )
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -89,40 +89,40 @@ class Post(models.Model):
         ordering = ('-publish',)
 
     def __str__(self):
-        return f'{self.title} by {self.blog.user.username}'
+        return f'{self.title} by {self.author.username}'
 
 
-class NewsPost(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+# class NewsPost(models.Model):
+#     post = models.ForeignKey(Post, on_delete=models.CASCADE)
 
-    read = models.BooleanField(default=False)
-    added = models.DateTimeField(auto_now=True)
+#     read = models.BooleanField(default=False)
+#     added = models.DateTimeField(auto_now=True)
 
-    blog = models.ForeignKey(Blog, models.CASCADE, related_name='news_feed')
+#     blog = models.ForeignKey(Blog, models.CASCADE, related_name='news_feed')
 
-    class Meta:
-        ordering = ('-added',)
+#     class Meta:
+#         ordering = ('-added',)
 
-    def __str__(self):
-        return f'Owner: {self.blog.user.username}. Slug: {self.post.slug}. From: {self.post.blog.user.username}'
+#     def __str__(self):
+#         return f'Owner: {self.blog.user.username}. Slug: {self.post.slug}. From: {self.post.blog.user.username}'
 
-    def get_absolute_url(self):
-        return reverse('blog:news-post-detail',
-                       kwargs={'pk': self.pk})
-
-
-def create_blog_for_new_user(sender, instance, signal, *args, **kwargs):
-        Blog(user=instance).save()
+#     def get_absolute_url(self):
+#         return reverse('blog:news-post-detail',
+#                        kwargs={'pk': self.pk})
 
 
-def news_feeds_update(sender, instance, signal, *args, **kwargs):
-    subscribed_blogs = instance.blog.user.blogs_subscribed.all()
-    send_mails_to_subscribers(instance.blog.user, subscribed_blogs, instance)
-    for blog in subscribed_blogs:
-        news = NewsPost(blog=blog,
-                        post=instance,
-                        )
-        news.save()
+# def create_blog_for_new_user(sender, instance, signal, *args, **kwargs):
+#         Blog(user=instance).save()
+
+
+# def news_feeds_update(sender, instance, signal, *args, **kwargs):
+#     subscribed_blogs = instance.blog.user.blogs_subscribed.all()
+#     send_mails_to_subscribers(instance.blog.user, subscribed_blogs, instance)
+#     for blog in subscribed_blogs:
+#         news = NewsPost(blog=blog,
+#                         post=instance,
+#                         )
+#         news.save()
 
 
 def send_mails_to_subscribers(sender, blogs, post):
@@ -145,5 +145,5 @@ def start_sending(args):
     return result
 
 # subscribe a handler to post_save CustomerUser event
-signals.post_save.connect(news_feeds_update, sender=Post)
-signals.post_save.connect(create_blog_for_new_user, sender=User)
+# signals.post_save.connect(news_feeds_update, sender=Post)
+# signals.post_save.connect(create_blog_for_new_user, sender=User)

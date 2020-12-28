@@ -1,11 +1,11 @@
 from django.contrib import admin
-from .models import Post, Blog, NewsPost
+from .models import Post  #, Blog, NewsPost
 
 
 # Register your models here.
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'slug', 'publish', 'status',)
+    list_display = ('title', 'slug', 'publish', 'status')
     list_filter = ('status', 'created', 'publish', )
 
     search_fields = ('title', 'body',)
@@ -18,11 +18,11 @@ class PostAdmin(admin.ModelAdmin):
     ordering = ('status', 'publish')
 
 
-@admin.register(Blog)
-class BlogAdmin(admin.ModelAdmin):
-    list_display = ('user',)
+# @admin.register(Blog)
+# class BlogAdmin(admin.ModelAdmin):
+#     list_display = ('user',)
 
 
-@admin.register(NewsPost)
-class NewPostAdmin(admin.ModelAdmin):
-    list_display = ('post', 'read', 'added',)
+# @admin.register(NewsPost)
+# class NewPostAdmin(admin.ModelAdmin):
+#     list_display = ('post', 'read', 'added',)

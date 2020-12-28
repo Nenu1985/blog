@@ -1,12 +1,5 @@
 
 <h2>Info</h2><hr>
-{% with blogs_subscribed=request.user.blogs_subscribed.all %}
-    {{ blogs_subscribed.count }} user{{ blogs_subscribed.count|pluralize }} are following you:<br>
-    {% for blog in blogs_subscribed %}
-        {{ blog.user.username }}
-
-    {% endfor %}
-{% endwith %}
 <hr>
 {% with subscribes=request.user.blog.subscribes.all %}
     You've subscribed on {{ subscribes.count }} bloger{{ subscribes.count|pluralize }} :<br>
