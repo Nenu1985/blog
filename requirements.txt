@@ -17,3 +17,4 @@ psycopg2
 requests 
 celery
 redis
+django-adminlte-3

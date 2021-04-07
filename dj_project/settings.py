@@ -32,6 +32,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'adminlte3',
+    'adminlte3_theme',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -132,6 +134,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+    # "/var/www/static/",
+]
+STATIC_ROOT = BASE_DIR / "static_root"
 
 STRIPE_PUBLIC_KEY = "pk_test_51IdCIZBjn6oKIvc3vasbZaTW5DRZeYpuVNglGh4MywJzruZeWwBdJSMxRHFMUekWGj1Wv6XA6JObBBxu3sqLTOsP00zspc3cHC"
 STRIPE_SECRET_KEY = "sk_test_51IdCIZBjn6oKIvc3txWnHNKJLjOhKuXV5N5QvTtbTxa78wdXR3eIYyj66Ba3t5uN8HWPLOtqD4kNP8GOfNfUlyzU00ta1mLz3l"
