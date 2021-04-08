@@ -18,5 +18,5 @@ requests
 celery
 redis
 django-adminlte-3
-psycopg2-binary
+# psycopg2-binary
 django-debug-toolbar
