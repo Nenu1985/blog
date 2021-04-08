@@ -1,0 +1,63 @@
+version: '3.7'
+
+services:
+  web:
+    build:
+      context: ./
+      args:
+        STATIC_URL: '/static/'
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/usr/src/app:Z
+    ports:
+      - 8000:8000
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+
+  db:
+    image: postgres:12.0-alpine
+    volumes:
+      - dm_postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=django_user
+      - POSTGRES_PASSWORD=django_pass
+      - POSTGRES_DB=django_movie_dev
+
+  redis:
+    image: library/redis:5.0-alpine
+    ports:
+      - 6379:6379
+    restart: unless-stopped
+    volumes:
+      - dj_project-redis:/data
+
+  worker:
+    build:
+      context: ./
+      args:
+        STATIC_URL: '/static/'
+    command: celery -A saleor --app=dj_project worker --loglevel=info
+    restart: unless-stopped
+    # env_file: common.env
+    depends_on:
+      - redis
+      # - mailhog
+    # volumes:
+    #   - ./saleor/saleor/:/app/saleor:Z,cached
+    #   - ./saleor/templates/:/app/templates:Z,cached
+    #   # shared volume between worker and api for media
+    #   - saleor-media:/app/media
+    environment:
+      # - DATABASE_URL=postgres://saleor:saleor@db/saleor
+      # - DEFAULT_FROM_EMAIL=noreply@example.com
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      # - SECRET_KEY=changeme
+      # - EMAIL_URL=smtp://mailhog:1025
+    volumes:
+      - .:/usr/src/app:Z
+
+volumes:
+  dm_postgres_data:
+  dj_project-redis:

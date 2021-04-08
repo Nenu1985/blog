@@ -1,5 +1,5 @@
 import json
-
+from django.shortcuts import render
 import stripe
 from django.conf import settings
 from django.core.mail import send_mail
@@ -9,6 +9,15 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 
 from .models import Product
+import logging
+import json
+from django.http import HttpResponse
+from pathlib import PosixPath
+import os
+import types
+
+logger = logging.getLogger(__name__)
+
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -33,6 +42,25 @@ class ProductLandingPageView(TemplateView):
         })
         return context
 
+def project_settings(request):
+
+    context = {}
+    for setting in dir(settings):
+        if setting.isupper():
+            if isinstance(getattr(settings, setting), PosixPath):
+                context[setting] = str(getattr(settings, setting))
+                continue
+            if isinstance(getattr(settings, setting), list) or isinstance(getattr(settings, setting), dict):
+                continue
+            context[setting] = getattr(settings, setting)
+
+
+    return HttpResponse(json.dumps(context, indent=4), content_type="application/json")
+
+def os_envs(request):
+
+    return HttpResponse(json.dumps({k.decode():v.decode() for k,v in os.environ.__dict__['_data'].items()}, indent=4),
+                        content_type="application/json")
 
 class CreateCheckoutSessionView(View):
     def post(self, request, *args, **kwargs):
