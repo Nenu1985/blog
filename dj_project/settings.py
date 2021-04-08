@@ -179,13 +179,15 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", CELERY_BROKER_URL)
 
-#-----------------------------------------------
+
+# -----------------------------------------------
 # Django debug toolbar
 # this makes toolbar work in a docker!
 def show_toolbar(request):
     return True
 
+
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': show_toolbar,
 }
-#-----------------------------------------------
+# -----------------------------------------------

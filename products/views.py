@@ -1,5 +1,8 @@
 import json
-from django.shortcuts import render
+import logging
+import os
+from pathlib import PosixPath
+
 import stripe
 from django.conf import settings
 from django.core.mail import send_mail
@@ -9,12 +12,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 
 from .models import Product
-import logging
-import json
-from django.http import HttpResponse
-from pathlib import PosixPath
-import os
-import types
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +39,7 @@ class ProductLandingPageView(TemplateView):
         })
         return context
 
+
 def project_settings(request):
 
     context = {}
@@ -54,13 +52,14 @@ def project_settings(request):
                 continue
             context[setting] = getattr(settings, setting)
 
-
     return HttpResponse(json.dumps(context, indent=4), content_type="application/json")
+
 
 def os_envs(request):
 
-    return HttpResponse(json.dumps({k.decode():v.decode() for k,v in os.environ.__dict__['_data'].items()}, indent=4),
+    return HttpResponse(json.dumps({k.decode(): v.decode() for k, v in os.environ.__dict__['_data'].items()}, indent=4),
                         content_type="application/json")
+
 
 class CreateCheckoutSessionView(View):
     def post(self, request, *args, **kwargs):
@@ -104,10 +103,10 @@ def stripe_webhook(request):
         event = stripe.Webhook.construct_event(
             payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
         )
-    except ValueError as e:
+    except ValueError:
         # Invalid payload
         return HttpResponse(status=400)
-    except stripe.error.SignatureVerificationError as e:
+    except stripe.error.SignatureVerificationError:
         # Invalid signature
         return HttpResponse(status=400)
 
@@ -128,7 +127,7 @@ def stripe_webhook(request):
         )
 
         # TODO - decide whether you want to send the file or the URL
-    
+
     elif event["type"] == "payment_intent.succeeded":
         intent = event['data']['object']
 
@@ -169,4 +168,4 @@ class StripeIntentView(View):
                 'clientSecret': intent['client_secret']
             })
         except Exception as e:
-            return JsonResponse({ 'error': str(e) })
+            return JsonResponse({'error': str(e)})

@@ -43,18 +43,8 @@ services:
     # env_file: common.env
     depends_on:
       - redis
-      # - mailhog
-    # volumes:
-    #   - ./saleor/saleor/:/app/saleor:Z,cached
-    #   - ./saleor/templates/:/app/templates:Z,cached
-    #   # shared volume between worker and api for media
-    #   - saleor-media:/app/media
     environment:
-      # - DATABASE_URL=postgres://saleor:saleor@db/saleor
-      # - DEFAULT_FROM_EMAIL=noreply@example.com
       - CELERY_BROKER_URL=redis://redis:6379/0
-      # - SECRET_KEY=changeme
-      # - EMAIL_URL=smtp://mailhog:1025
     volumes:
       - .:/usr/src/app:Z
 

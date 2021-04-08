@@ -33,7 +33,7 @@ urlpatterns = [
     path('create-checkout-session/<pk>/', CreateCheckoutSessionView.as_view(), name='create-checkout-session'),
     path('api/v1/', include('rest_basics.urls')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('swagger(format\.json|\.yaml)', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    # path('swagger(format\.json|\.yaml)', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
