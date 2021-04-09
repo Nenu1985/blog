@@ -43,6 +43,7 @@ class ProductLandingPageView(TemplateView):
 def project_settings(request):
 
     context = {}
+    context['AAA'] = 'BBB'
     for setting in dir(settings):
         if setting.isupper():
             if isinstance(getattr(settings, setting), PosixPath):

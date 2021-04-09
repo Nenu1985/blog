@@ -7,6 +7,22 @@ import sys
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dj_project.settings')
+
+    # # start new section
+    # from django.conf import settings
+
+    # if settings.DEBUG:
+    #     if os.environ.get('RUN_MAIN') and os.environ.get('DEBUG_IN_CONTAINER'):
+    #         # import ptvsd
+    #         import debugpy
+    #         debugpy.listen(('0.0.0.0', 5678))
+    #         # Pause the program until a remote debugger is attached
+    #         debugpy.wait_for_client()
+    #         # ptvsd.enable_attach(address=('0.0.0.0', 5678))
+    #         # debugpy.breakpoint()
+    #         print('Attached!')
+    # # end new section
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
