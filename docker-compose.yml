@@ -13,11 +13,8 @@ services:
     volumes:
       - .:/app
     ports:
-      - 8000:8000
-      - 5678:5678
-    environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-
+      - 8000:8000  # django
+      - 5678:5678  # debuger's port
   db:
     image: postgres:12.0-alpine
     volumes:
@@ -41,9 +38,8 @@ services:
       target: debug
       args:
         STATIC_URL: '/static/'
-    command: celery -A saleor --app=dj_project worker --loglevel=info
+    command: celery --app=dj_project worker --loglevel=info
     restart: unless-stopped
-    # env_file: common.env
     depends_on:
       - redis
     environment:
@@ -51,6 +47,12 @@ services:
     volumes:
       - .:/app
 
+  flower:
+    image: mher/flower:0.9.7
+    command: flower --address=0.0.0.0 --port=5555 --broker=redis://redis:6379/0
+    ports:
+      - 5555:5555
+    restart: unless-stopped
 volumes:
   dm_postgres_data:
   dj_project-redis:
