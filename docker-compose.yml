@@ -1,17 +1,28 @@
 version: '3.7'
 
+x-web_app: &web_app
+  build:
+    context: ./
+    target: dev
+    args:
+      STATIC_URL: '/static/'
+  environment:
+    AWS_ACCESS_KEY: &aws_access_key AKIASLU4G3SBYZALV6OK
+    AWS_SECRET_KEY: &aws_secret_key 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
+    CELERY_BROKER_URL:  &celery_broker "sqs://AKIASLU4G3SBYZALV6OK:Xg6kFjgi6WMX1y9xivNH4YlI3dD3%2FOv%2BstmCAw2k@"
+    # CELERY_BROKER_URL:  &celery_broker "https://sqs.eu-central-1.amazonaws.com/162462620803/celery_queue"
+    CELERY_RESULT_BACKEND: redis://redis:6379/0
+    # CELERY_BROKER_URL: &celery_broker redis://redis:6379/0
+  depends_on:
+    - redis
+  volumes:
+    - .:/app
+
 services:
   web:
-    build:
-      context: ./
-      target: debug
-      args:
-        STATIC_URL: '/static/'
+    <<: *web_app
     depends_on:
       - db
-      - redis
-    volumes:
-      - .:/app
     ports:
       - 8000:8000  # django
       - 5678:5678  # debuger's port
@@ -33,26 +44,26 @@ services:
       - dj_project-redis:/data
 
   worker:
-    build:
-      context: ./
-      target: debug
-      args:
-        STATIC_URL: '/static/'
+    <<: *web_app
     command: celery --app=dj_project worker --loglevel=info
     restart: unless-stopped
-    depends_on:
-      - redis
-    environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-    volumes:
-      - .:/app
 
   flower:
-    image: mher/flower:0.9.7
-    command: flower --address=0.0.0.0 --port=5555 --broker=redis://redis:6379/0
+    build:
+      dockerfile: flower_dockerfile
+      context: ./
+    environment:
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      CELERY_BROKER_URL: *celery_broker
+    command: celery flower -A dj_project --address=0.0.0.0 --port=5555
+    # command: celery flower -A dj_project --address=0.0.0.0 --port=5555 --broker=sqs://AKIASLU4G3SBYZALV6OK:Xg6kFjgi6WMX1y9xivNH4YlI3dD3%2FOv%2BstmCAw2k@
+    # command: flower --address=0.0.0.0 --port=5555 --broker=redis://redis:6379/0
+    # command: flower --address=0.0.0.0 --port=5555 --broker=sqs://AKIASLU4G3SBYZALV6OK:Xg6kFjgi6WMX1y9xivNH4YlI3dD3%2FOv%2BstmCAw2k@
     ports:
       - 5555:5555
     restart: unless-stopped
+    volumes:
+      - .:/app
 volumes:
   dm_postgres_data:
   dj_project-redis:

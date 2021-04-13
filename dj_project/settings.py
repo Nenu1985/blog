@@ -178,6 +178,11 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", CELERY_BROKER_URL)
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    'region': 'eu-central-1',
+    'queue_name_prefix': 'celery-'
+}
+CELERY_S3_REGION = 'eu-central-1'
 
 
 # -----------------------------------------------

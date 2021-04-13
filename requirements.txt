@@ -19,3 +19,6 @@ celery
 redis
 django-adminlte-3
 django-debug-toolbar
+celery[sqs]
+# botocore
+# sqs

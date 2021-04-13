@@ -1,0 +1,12 @@
+FROM mher/flower:0.9.7
+
+WORKDIR /app
+COPY ./requirements.txt .
+RUN pip install -U pip
+RUN pip install Django django-adminlte-3 django-debug-toolbar djangorestframework drf-yasg asgiref certifi \
+chardet idna pytz requests sqlparse stripe urllib3 botocore boto3
+COPY . /app
+EXPOSE 5555
+
+
+
